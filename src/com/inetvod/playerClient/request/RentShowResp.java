@@ -5,8 +5,8 @@
 package com.inetvod.playerClient.request;
 
 import com.inetvod.common.core.DataReader;
-import com.inetvod.common.data.License;
 import com.inetvod.common.data.RentedShowID;
+import com.inetvod.playerClient.rqdata.License;
 
 public class RentShowResp implements com.inetvod.common.core.Readable
 {
