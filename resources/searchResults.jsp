@@ -9,9 +9,16 @@
 <jsp:useBean id="mobileManager" class="com.inetvod.mobile.MobileManager" scope="request"/>
 <%@ page import="com.inetvod.playerClient.rqdata.ShowSearch"%>
 <%@ page import="com.inetvod.playerClient.rqdata.ShowSearchList"%>
+<%
+	if(!mobileManager.initialize(request))
+	{
+		response.sendRedirect("logon.jsp");
+		return;
+	}
+%>
 <html>
 <head>
-	<title>Fresh VOD</title>
+	<title>iNetVOD Featured</title>
 </head>
 <body>
 <br/>
@@ -19,7 +26,7 @@ Featured<br/>
 
 <%
 	String errorMsg = "";
-	ShowSearchList showSearchList = mobileManager.getFeaturedList();
+	ShowSearchList showSearchList = mobileManager.getFeaturedList(response);
 	if(showSearchList != null)
 	{
 		for(ShowSearch showSearch : showSearchList)

@@ -58,7 +58,7 @@ public class PlayerRequestor
 		return new PlayerRequestor(requestURL);
 	}
 
-	public static PlayerRequestor newInstance(String requestURL, String sessionData) throws Exception
+	public static PlayerRequestor newInstance(String requestURL, String sessionData)
 	{
 		PlayerRequestor playerRequestor = newInstance(requestURL);
 

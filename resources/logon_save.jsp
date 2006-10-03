@@ -8,20 +8,8 @@
 %>
 <jsp:useBean id="mobileManager" class="com.inetvod.mobile.MobileManager" scope="request"/>
 <%
-	if(!mobileManager.initialize(request))
-	{
-		response.sendRedirect("logon.jsp");
-		return;
-	}
+	if(mobileManager.logonToService(request, response))
+		response.sendRedirect("home.jsp");
+	else
+		response.sendRedirect(String.format("logon.jsp?err=" + mobileManager.getErrorMessage()));
 %>
-<html>
-<head>
-	<title>iNetVOD Home</title>
-</head>
-<body>
-<br/>
-
-Go: <a href="nowPlaying.jsp">Playlist</a> <a href="searchResults.jsp">Featured</a>
-
-</body>
-</html>

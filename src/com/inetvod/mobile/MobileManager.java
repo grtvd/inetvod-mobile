@@ -4,28 +4,33 @@
  */
 package com.inetvod.mobile;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.inetvod.common.core.StrUtil;
 import com.inetvod.common.data.CategoryID;
+import com.inetvod.common.data.ProviderID;
 import com.inetvod.common.data.ShowCost;
 import com.inetvod.common.data.ShowCostType;
 import com.inetvod.common.data.ShowID;
-import com.inetvod.common.data.ProviderID;
 import com.inetvod.playerClient.PlayerRequestor;
-import com.inetvod.playerClient.request.SignonResp;
 import com.inetvod.playerClient.request.CheckShowAvailResp;
+import com.inetvod.playerClient.request.SignonResp;
 import com.inetvod.playerClient.request.StatusCode;
+import com.inetvod.playerClient.rqdata.RentedShowSearchList;
+import com.inetvod.playerClient.rqdata.ShowDetail;
 import com.inetvod.playerClient.rqdata.ShowProvider;
 import com.inetvod.playerClient.rqdata.ShowSearch;
 import com.inetvod.playerClient.rqdata.ShowSearchList;
-import com.inetvod.playerClient.rqdata.ShowDetail;
-import com.inetvod.playerClient.rqdata.RentedShowSearchList;
 
 public class MobileManager
 {
 	/* Constants */
+	private static final String SESSION_COOKIE = "session";
 	private static final String SHOWID_PARAM = "showid";
+	private static final String USERID_PARAM = "userid";
+	private static final String PASSWORD_PARAM = "password";
 
 	/* Fields */
 	private static final String fNetworkURL = "http://api.inetvod.com/inetvod/playerapi/xml";
@@ -37,7 +42,7 @@ public class MobileManager
 	private String fErrorMessage;
 
 	/* Getters and Setters */
-	private PlayerRequestor getPlayerRequestor() throws Exception
+	private PlayerRequestor getPlayerRequestor()
 	{
 		if(fPlayerRequestor == null)
 			fPlayerRequestor = PlayerRequestor.newInstance(fNetworkURL, fSessionData);
@@ -45,45 +50,55 @@ public class MobileManager
 	}
 
 	/* Construction */
+	public boolean initialize(HttpServletRequest request)
+	{
+		loadDataSettings(request);
+
+		return fIsUserLoggedOn;
+	}
 
 	/* Implementation */
 	public String getErrorMessage()
 	{
-		String msg = null;
+		String msg;
 
-		try
-		{
-			if(StrUtil.hasLen(fErrorMessage))
-				msg = fErrorMessage;
-			else
-				msg = getPlayerRequestor().getStatusMessage();
-		}
-		catch(Exception e)
-		{
-		}
+		if(StrUtil.hasLen(fErrorMessage))
+			msg = fErrorMessage;
+		else
+			msg = getPlayerRequestor().getStatusMessage();
 
 		if(!StrUtil.hasLen(msg))
 			msg = "An unknown error has occurred.";
 		return "Error: " + msg;
 	}
 
-	public ShowSearchList getFeaturedList()
+	public boolean logonToService(HttpServletRequest request, HttpServletResponse response)
 	{
-		try
+		String userID = request.getParameter(USERID_PARAM);
+		String password = request.getParameter(PASSWORD_PARAM);
+
+		if(pingServer())
 		{
-			if(pingServer())
+			if(signon(userID, password))
 			{
-				if(signon())
-				{
-					return showSearchFeatured();
-				}
+				saveDataSettings(response);
+				return true;
 			}
 		}
-		catch(Exception e)
-		{
-		}
 
-		return null;
+		return false;
+	}
+
+	public ShowSearchList getFeaturedList(HttpServletResponse response)
+	{
+		ShowSearchList showSearchList = null;
+
+		if(this.fIsUserLoggedOn)
+			showSearchList = showSearchFeatured();
+
+		if(showSearchList == null)
+			checkInvalidSession(response);
+		return showSearchList;
 	}
 
 	public boolean includeShowSearch(ShowSearch showSearch)
@@ -101,63 +116,89 @@ public class MobileManager
 		return String.format("rentShow.jsp?showid=%s", showSearch.getShowID().toString());
 	}
 
-	public RentedShowSearchList getPlaylist()
+	public RentedShowSearchList getPlaylist(HttpServletResponse response)
 	{
-		try
-		{
-			if(pingServer())
-			{
-				if(signon())
-				{
-					return rentedShowList();
-				}
-			}
-		}
-		catch(Exception e)
-		{
-		}
+		RentedShowSearchList rentedShowSearchList = null;
 
-		return null;
+		if(this.fIsUserLoggedOn)
+			rentedShowSearchList = rentedShowList();
+
+		if(rentedShowSearchList == null)
+			checkInvalidSession(response);
+		return rentedShowSearchList;
 	}
 
-	public String rentShow(HttpServletRequest request) throws Exception
+	public String rentShow(HttpServletRequest request, HttpServletResponse response)
 	{
-		try
-		{
-			ShowID showID = new ShowID(request.getParameter(SHOWID_PARAM));
+		ShowID showID = new ShowID(request.getParameter(SHOWID_PARAM));
 
-			if(pingServer())
-			{
-				if(signon())
-				{
-					ShowDetail showDetail = showDetail(showID);
-					if(showDetail != null)
-						if(doRentalLogic(showDetail))
-							return String.format("%s has been successfully added to your Playlist.",
-								showDetail.getNameWithEpisode());
-				}
-			}
-		}
-		catch(Exception e)
+		if(this.fIsUserLoggedOn)
 		{
+			ShowDetail showDetail = showDetail(showID);
+			if(showDetail != null)
+				if(doRentalLogic(showDetail))
+					return String.format("%s has been successfully added to your Playlist.",
+						showDetail.getNameWithEpisode());
 		}
 
+		checkInvalidSession(response);
 		return getErrorMessage();
 	}
 
-	private boolean pingServer() throws Exception
+	private void loadDataSettings(HttpServletRequest request)
+	{
+		Cookie cookies[] = request.getCookies();
+		String value;
+
+		if(cookies != null)
+		{
+			for(Cookie cookie : cookies)
+			{
+				if(SESSION_COOKIE.equals(cookie.getName()))
+				{
+					value = cookie.getValue();
+					if(StrUtil.hasLen(value))
+					{
+						fIsUserLoggedOn = true;
+						fSessionData = value;
+					}
+
+					break;
+				}
+			}
+		}
+	}
+
+	private void saveDataSettings(HttpServletResponse response)
+	{
+		Cookie cookie = new Cookie(SESSION_COOKIE, StrUtil.hasLen(fSessionData) ? fSessionData : "");
+		response.addCookie(cookie);
+	}
+
+	private void checkInvalidSession(HttpServletResponse response)
+	{
+		if(StatusCode.sc_InvalidSession.equals(getPlayerRequestor().getStatusCode()))
+		{
+			fIsUserLoggedOn = false;
+			fSessionData = null;
+
+			saveDataSettings(response);
+		}
+	}
+
+	private boolean pingServer()
 	{
 		if(!fCanPingServer)
 			fCanPingServer = getPlayerRequestor().pingServer();
 		return fCanPingServer;
 	}
 
-	private boolean signon() throws Exception
+	private boolean signon(String userID, String password)
 	{
 		if(!fIsUserLoggedOn)
 		{
 			PlayerRequestor playerRequestor = getPlayerRequestor();
-			SignonResp signonResp = playerRequestor.signon("100000000", "123456");
+			SignonResp signonResp = playerRequestor.signon(userID, password);
 			if(StatusCode.sc_Success.equals(playerRequestor.getStatusCode()))
 			{
 				fSessionData = signonResp.getSessionData();
@@ -169,17 +210,17 @@ public class MobileManager
 		return fIsUserLoggedOn;
 	}
 
-	private ShowSearchList showSearchFeatured() throws Exception
+	private ShowSearchList showSearchFeatured()
 	{
 		return getPlayerRequestor().showSearch(new CategoryID("featured"));
 	}
 
-	private ShowDetail showDetail(ShowID showID) throws Exception
+	private ShowDetail showDetail(ShowID showID)
 	{
 		return getPlayerRequestor().showDetail(showID);
 	}
 
-	private boolean doRentalLogic(ShowDetail showDetail) throws Exception
+	private boolean doRentalLogic(ShowDetail showDetail)
 	{
 		for(ShowProvider showProvider : showDetail.getShowProviderList())
 		{
@@ -196,7 +237,7 @@ public class MobileManager
 		return false;
 	}
 
-	private boolean checkShowAvail(ShowID showID, ProviderID providerID, ShowCost showCost) throws Exception
+	private boolean checkShowAvail(ShowID showID, ProviderID providerID, ShowCost showCost)
 	{
 		PlayerRequestor playerRequestor = getPlayerRequestor();
 		CheckShowAvailResp checkShowAvailResp = playerRequestor.checkShowAvail(showID, providerID, showCost);
@@ -212,7 +253,7 @@ public class MobileManager
 		return rentShow(showID, providerID, showCost);
 	}
 
-	private boolean rentShow(ShowID showID, ProviderID providerID, ShowCost approvedCost) throws Exception
+	private boolean rentShow(ShowID showID, ProviderID providerID, ShowCost approvedCost)
 	{
 		PlayerRequestor playerRequestor = getPlayerRequestor();
 		playerRequestor.rentShow(showID, providerID, approvedCost);
@@ -220,7 +261,7 @@ public class MobileManager
 		return StatusCode.sc_Success.equals(playerRequestor.getStatusCode());
 	}
 
-	private RentedShowSearchList rentedShowList() throws Exception
+	private RentedShowSearchList rentedShowList()
 	{
 		return getPlayerRequestor().rentedShowList();
 	}

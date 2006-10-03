@@ -7,21 +7,19 @@
 	 */
 %>
 <jsp:useBean id="mobileManager" class="com.inetvod.mobile.MobileManager" scope="request"/>
-<%
-	if(!mobileManager.initialize(request))
-	{
-		response.sendRedirect("logon.jsp");
-		return;
-	}
-%>
 <html>
 <head>
-	<title>iNetVOD Home</title>
+	<title>iNetVOD Logon</title>
 </head>
 <body>
 <br/>
+<form action="logon_save.jsp" method="post" name="mobile">
 
-Go: <a href="nowPlaying.jsp">Playlist</a> <a href="searchResults.jsp">Featured</a>
+Logon ID: <input name="userid" size="9" maxlength="9"/><br/>
+PIN: <input name="password" size="6" maxlength="6"/><br/>
 
+<input name="logon" type="submit" value="Logon">
+
+</form>
 </body>
 </html>

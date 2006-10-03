@@ -7,15 +7,20 @@
 	 */
 %>
 <jsp:useBean id="mobileManager" class="com.inetvod.mobile.MobileManager" scope="request"/>
+<%
+	if(!mobileManager.initialize(request))
+	{
+		response.sendRedirect("logon.jsp");
+		return;
+	}
+	String msg = mobileManager.rentShow(request, response);
+%>
 <html>
 <head>
-	<title>Fresh VOD</title>
+	<title>iNetVOD Featured</title>
 </head>
 <body>
 <br/>
-<%
-String msg = mobileManager.rentShow(request);
-%>
 <%=msg%>
 <br/>
 <br/>

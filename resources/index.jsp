@@ -7,11 +7,9 @@
 	 */
 %>
 <jsp:useBean id="mobileManager" class="com.inetvod.mobile.MobileManager" scope="request"/>
-<%@ page import="com.inetvod.playerClient.rqdata.ShowSearch"%>
-<%@ page import="com.inetvod.playerClient.rqdata.ShowSearchList"%>
 <html>
 <head>
-	<title>Fresh VOD</title>
+	<title>Playlist Manager</title>
 </head>
 <body style=" margin-left: 0px; margin-top: 0px; margin-right: 0px; margin-bottom: 0px;">
 <a href="home.jsp"><img src="images/intro.png" alt="Welcome" border="0"/></a>
