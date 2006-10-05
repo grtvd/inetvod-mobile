@@ -10,8 +10,30 @@
 <html>
 <head>
 	<title>Playlist Manager</title>
+	<style type="text/css">
+	<!--
+	body,td,a,p{font-family:arial,sans-serif;font-size:6pt;}
+	h1{font-size:7pt;color:navy;}
+	-->
+	</style>
 </head>
 <body style=" margin-left: 0px; margin-top: 0px; margin-right: 0px; margin-bottom: 0px;">
-<a href="home.jsp"><img src="images/intro.png" alt="Welcome" border="0"/></a>
+<table cellpadding="0" cellspacing="0" border="0">
+	<tr>
+		<td><img src="images/banner.jpg" alt="iNetVOD"/></td>
+	</tr>
+	<tr>
+		<td align="center" style="color:red;">Moblie Playlist Service</td>
+	</tr>
+	<tr>
+		<td align="center"><h1>Videos, TV, Movies</h1></td>
+	</tr>
+	<tr>
+		<td align="center"><a href="home.jsp"><img src="images/play.gif" alt="Ready To Play" border="0"/></a></td>
+	</tr>
+	<tr>
+		<td align="center">a Service of<br>iNetVOD.com</td>
+	</tr>
+</table>
 </body>
 </html>
