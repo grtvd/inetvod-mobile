@@ -13,7 +13,6 @@ import com.inetvod.common.core.StrUtil;
 import com.inetvod.common.data.ProviderID;
 import com.inetvod.common.data.RentedShowID;
 import com.inetvod.common.data.ShowID;
-import com.inetvod.common.dbdata.Show;
 
 public class RentedShowSearch implements Readable
 {
@@ -60,8 +59,8 @@ public class RentedShowSearch implements Readable
 
 		fShowID = reader.readDataID("ShowID", ShowID.MaxLength, ShowID.CtorString);
 		fProviderID = reader.readDataID("ProviderID", ProviderID.MaxLength, ProviderID.CtorString);
-		fName = reader.readString("Name", Show.NameMaxLength);
-		fEpisodeName = reader.readString("EpisodeName", Show.EpisodeNameMaxLength);
+		fName = reader.readString("Name", ShowDetail.NameMaxLength);
+		fEpisodeName = reader.readString("EpisodeName", ShowDetail.EpisodeNameMaxLength);
 
 		fAvailableUntil = reader.readDateTime("AvailableUntil");
 	}

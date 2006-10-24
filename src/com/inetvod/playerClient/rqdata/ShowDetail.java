@@ -14,12 +14,19 @@ import com.inetvod.common.data.CategoryID;
 import com.inetvod.common.data.CategoryIDList;
 import com.inetvod.common.data.RatingID;
 import com.inetvod.common.data.ShowID;
-import com.inetvod.common.dbdata.Show;
 
 public class ShowDetail implements Readable
 {
 	/* Constants */
 	public static Constructor<ShowDetail> CtorDataReader = DataReader.getCtor(ShowDetail.class);
+
+	/* Constants */
+	public static final int NameMaxLength = 64;
+	public static final int EpisodeNameMaxLength = 64;
+	public static final int EpisodeNumberMaxLength = 32;
+	public static final int DescriptionMaxLength = Short.MAX_VALUE;
+	public static final int ShowURLMaxLength = 4096;
+	public static final int PictureURLMaxLength = 4096;
 
 	/* Fields */
 	protected ShowID fShowID;
@@ -72,15 +79,15 @@ public class ShowDetail implements Readable
 	public void readFrom(DataReader reader) throws Exception
 	{
 		fShowID = reader.readDataID("ShowID", ShowID.MaxLength, ShowID.CtorString);
-		fName = reader.readString("Name", Show.NameMaxLength);
-		fEpisodeName = reader.readString("EpisodeName", Show.EpisodeNameMaxLength);
-		fEpisodeNumber = reader.readString("EpisodeNumber", Show.EpisodeNumberMaxLength);
+		fName = reader.readString("Name", NameMaxLength);
+		fEpisodeName = reader.readString("EpisodeName", EpisodeNameMaxLength);
+		fEpisodeNumber = reader.readString("EpisodeNumber", EpisodeNumberMaxLength);
 
 		fReleasedOn = reader.readDate("ReleasedOn");
 		fReleasedYear = reader.readShort("ReleasedYear");
-		fDescription = reader.readString("Description", Show.DescriptionMaxLength);
+		fDescription = reader.readString("Description", DescriptionMaxLength);
 		fRunningMins = reader.readShort("RunningMins");
-		fPictureURL = reader.readString("PictureURL", Show.PictureURLMaxLength);
+		fPictureURL = reader.readString("PictureURL", PictureURLMaxLength);
 
 		fCategoryIDList = reader.readStringList("CategoryID", CategoryID.MaxLength, CategoryIDList.Ctor, CategoryID.CtorString);
 		fRatingID = reader.readDataID("RatingID", RatingID.MaxLength, RatingID.CtorString);

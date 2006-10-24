@@ -11,7 +11,6 @@ import com.inetvod.common.core.DataReader;
 import com.inetvod.common.core.Readable;
 import com.inetvod.common.core.StrUtil;
 import com.inetvod.common.data.ShowID;
-import com.inetvod.common.dbdata.Show;
 
 public class ShowSearch implements Readable
 {
@@ -51,8 +50,8 @@ public class ShowSearch implements Readable
 	public void readFrom(DataReader reader) throws Exception
 	{
 		fShowID = reader.readDataID("ShowID", ShowID.MaxLength, ShowID.CtorString);
-		fName = reader.readString("Name", Show.NameMaxLength);
-		fEpisodeName = reader.readString("EpisodeName", Show.EpisodeNameMaxLength);
+		fName = reader.readString("Name", ShowDetail.NameMaxLength);
+		fEpisodeName = reader.readString("EpisodeName", ShowDetail.EpisodeNameMaxLength);
 		fReleasedOn = reader.readDate("ReleasedOn");
 		fReleasedYear = reader.readShort("ReleasedYear");
 		fShowProviderList = reader.readList("ShowProvider", ShowProviderList.Ctor, ShowProvider.CtorDataReader);
