@@ -14,6 +14,7 @@ import com.inetvod.common.data.ProviderID;
 import com.inetvod.common.data.ShowCost;
 import com.inetvod.common.data.ShowCostType;
 import com.inetvod.common.data.ShowID;
+import com.inetvod.common.data.ManufacturerID;
 import com.inetvod.playerClient.PlayerRequestor;
 import com.inetvod.playerClient.request.CheckShowAvailResp;
 import com.inetvod.playerClient.request.SignonResp;
@@ -23,6 +24,7 @@ import com.inetvod.playerClient.rqdata.ShowDetail;
 import com.inetvod.playerClient.rqdata.ShowProvider;
 import com.inetvod.playerClient.rqdata.ShowSearch;
 import com.inetvod.playerClient.rqdata.ShowSearchList;
+import com.inetvod.playerClient.rqdata.Player;
 
 public class MobileManager
 {
@@ -198,7 +200,8 @@ public class MobileManager
 		if(!fIsUserLoggedOn)
 		{
 			PlayerRequestor playerRequestor = getPlayerRequestor();
-			SignonResp signonResp = playerRequestor.signon(userID, password);
+			Player player = Player.newInstance(new ManufacturerID("inetvod"), "webapp", "1", "1.0.0000");	//TODO Fix modelNo 
+			SignonResp signonResp = playerRequestor.signon(userID, password, player);
 			if(StatusCode.sc_Success.equals(playerRequestor.getStatusCode()))
 			{
 				fSessionData = signonResp.getSessionData();
@@ -212,7 +215,7 @@ public class MobileManager
 
 	private ShowSearchList showSearchFeatured()
 	{
-		return getPlayerRequestor().showSearch(new CategoryID("featured"));
+		return getPlayerRequestor().showSearch(null, null, CategoryID.Featured, null);
 	}
 
 	private ShowDetail showDetail(ShowID showID)
