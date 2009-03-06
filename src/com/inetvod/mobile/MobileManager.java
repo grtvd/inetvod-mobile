@@ -35,7 +35,7 @@ public class MobileManager
 	private static final String PASSWORD_PARAM = "password";
 
 	/* Fields */
-	private static final String fNetworkURL = "http://api.inetvod.com/inetvod/playerapi/xml";
+	private static final String fNetworkURL = "http://api.stormmediaplayer.com/webapi/playerapi/xml";
 
 	private PlayerRequestor fPlayerRequestor;
 	private boolean fCanPingServer;
